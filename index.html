@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>小学三年级语文笔顺查询</title>
+    <script src="hanzi-writer.min.js"></script>
+    <script src="vue.min.js"></script>
+    <style>
+        #app {
+            border: 1px solid #0c3;
+            border-radius: 8px;
+            box-shadow: 0 0 4px 2px #0c3;
+            margin: 20px 20px;
+            padding: 10px 20px;
+            word-break: keep-all;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .tip {
+            font-size: 16px;
+
+        }
+
+        .cheer {
+            font-weight: bold;
+            font-size: 40px;
+            text-align: end;
+            color: #00b;
+            flex: 1;
+        }
+
+        h3 {
+            font-size: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: #0c3;
+            letter-spacing: 6px;
+        }
+
+        .lesson {
+            display: flex;
+            flex-direction: row;
+            margin: 20px 0px;
+            text-align: left;
+        }
+
+        .lesson_index {
+            width: 60px;
+            margin-top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .words {
+            flex: 1;
+        }
+
+        .hanzi {
+            display: inline;
+            width: 36px;
+            height: 36px;
+            font-family: KaiTi, KaiTiGB2312, STKaiti;
+            font-size: 28px;
+            line-height: 52px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .hanzi.space, .hanzi.right {
+            margin-right: 10px;
+        }
+
+        #writer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 200px;
+            width: 100%;
+            height: 100%;
+            vertical-align: middle;
+            box-sizing: border-box;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="header">
+        <div class="tip">
+            点字看笔顺 <br />
+            小学三年级语文人教版
+        </div>
+        <div class="cheer">亮亮加油！</div>
+    </div>
+    <h3>词语表</h3>
+    <div v-for="([lesson_index, sentence]) in ciyubiao" class="lesson">
+        <div class="lesson_index">{{lesson_index}}</div>
+        <div class="words">
+            <span v-for="char in sentence" :class="{hanzi:true, space: char === ' '}" @click="animateChar(char)">{{char}}</span>
+        </div>
+    </div>
+    <h3>写字表</h3>
+    <div v-for="([lesson_index, sentence]) in xiezibiao" class="lesson">
+        <div class="lesson_index">{{lesson_index}}</div>
+        <div class="words">
+            <span v-for="char in sentence" :class="{hanzi: true, right: true}"
+                  @click="animateChar(char)">{{char}}</span>
+        </div>
+    </div>
+    <div id="writer">
+
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                writing: false,
+                writer: null,
+                ciyubiao: [
+                    [1, "早晨 穿戴 鲜艳 服装 打扮 敬爱 国旗 敬礼 安静 树枝 好奇 孔雀 招引 粗壮 枝干 影子"],
+                    [2, "阵雨 荒野 跳舞 狂欢 功课 放假 互相 狂风 急急忙忙 自然 能够 双臂"],
+                    [5, "水泥 放晴 明朗亮晶晶 金黄 雨珠 院墙 落叶 闪闪发光 尽头 平展 排列 规则 歌唱 迟到"],
+                    [6, "清凉 留意 颜料 枫叶 邮票 果树 菊花 仙子 气味 香甜 香味 加紧 过冬 丰收"],
+                    [8, "火柴 围裙 可怜 哪怕 暖和 火焰 蜡烛 亮光 忽然 地板 烛光 温和 赶紧 痛苦 清晨"],
+                    [10, "旅行 要好 咱们 草堆 作声 偷偷 答应 做梦 来得及 救命 拼命 大吃一惊 消化 当然 几乎 知觉 光亮 眼泪"],
+                    [12, "变成 门板 准备 暴风雨 安心 睡觉 主人 墙壁 母鸡 注意 根本 蜘蛛 漂亮 因此"],
+                    [15, "母亲 外祖父 雨点 船夫 用力 船头 羽毛 翠绿 静悄悄 翠鸟 捕鱼"],
+                    [16, "窗前 蒲公英 盛开 玩耍 一本正经 绒毛 假装 哈欠 钓鱼 观察 合拢 有趣 喜爱"],
+                    [18, "位于 部分 风景 优美 物产 丰富 相互 交错 成群结队 游动 堆积 宝贵 肥料 祖国 事业 发展"],
+                    [19, "海滨 街道 交界 来来往往 渔民 遍地 远处 汽笛 船队 满载 银光闪闪 靠岸 初夏 散发 除了 整洁"],
+                    [20, "东北 脑袋 严严实实 挡住 视线 花坛 显得 花翠 飞舞 名贵 药材 雪花 巨大 宝库"],
+                    [21, "美妙 音乐家 演奏 感受 激动 合奏 乐曲 充满 乐器 雨滴 滴答 所有 河流 轻快 告诉"],
+                    [22, "高远 沉思 麻雀 蚂蚁 搬家 井然 精神 趣味 鲜美 如同 温柔 倒映 倒影 画册 无穷 无尽 乐趣"],
+                    [23, "父亲 童年 雾蒙蒙 轻声 生怕 惊动 气息 总是 抖动 露水 呼吸 时刻 猎人 翅膀 沉重"],
+                    [25, "掌声 文静 默默 离开 轮流 讲台 一齐 角落 慢吞吞 刚刚 热烈 持久 泪水 平息 动听 勇气 面对"],
+                    [26, "郊外 养病 跳动 欢快 谷粒 男孩 或者 严寒 本来 可惜 肯定 诚实"]
+                ],
+                xiezibiao: [
+                    [1, "晨 绒 球 汉 艳 服 装 扮 静 停 孔 雀 粗"],
+                    [2, "落 荒 笛 狂 罚 假 互 所 够 猜 扬 臂"],
+                    [4, "寒 径 斜 霜 赠 刘 盖 菊 残 君 橙 送 挑"],
+                    [5, "铺 泥 晶 院 墙 印 排 列 规 则 乱 棕 迟"],
+                    [6, "盒 颜 料 票 争 仙 闻 勾 紧 洞 油 曲 丰"],
+                    [8, "柴 旧 裙 怜 饿 焰 蜡 烛 伸 忽 板 富 颗"],
+                    [10, "旅 咱 偷 救 命 拼 扫 胃 管 乎 流 泪 算"],
+                    [12, "准 备 等 暴 睡 壁 砍 蜘 蛛 漂 撞 饱 晒"],
+                    [15, "搭 亲 父 沙 啦 响 羽 翠 嘴 悄 吞 哦 捕"],
+                    [16, "蒲 英 盛 耍 喊 欠 钓 而 察 拢 趣 喜"],
+                    [17, "断 楚 至 孤 帆 饮 初 镜 未 磨 遥 银 盘"],
+                    [18, "优 淡 浅 错 岩 虾 挺 刺 鼓 数 厚 宝 贵"],
+                    [19, "滨 灰 飘 渔 遍 躺 载 靠 亚 夏 除 踩 洁"],
+                    [20, "脑 袋 严 实 挡 视 线 坛 显 材 软 刮 库"],
+                    [21, "妙 演 奏 琴 感 受 激 击 器 滴 敲 鸣 诉"],
+                    [22, "读 麻 蚂 蚁 短 栽 寸 柔 册"],
+                    [23, "朝 雾 蒙 鼻 总 抖 露 湿 吸 猎 翅 膀 重"],
+                    [24, "司 庭 登 跌 众 弃 持"],
+                    [25, "掌 班 默 离 腿 轮 投 刚 调 摇 晃 烈 勇"],
+                    [26, "郊 养 粉 谷 粒 男 或 者 冻 冷 惜 肯 诚"]
+                ]
+            };
+        },
+        mounted: function () {
+            this.$nextTick(() => {
+                let writerEl = this.$el.querySelector('#writer');
+                this.writer = HanziWriter.create(writerEl, '我', {
+                    width: 200,
+                    height: 200,
+                    padding: 12,
+                    strokeAnimationSpeed: 1,
+                    delayBetweenStrokes: 1000,
+                });
+                writerEl.style.display = 'none';
+            });
+        },
+        methods: {
+            async sleep(ms) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(resolve, ms);
+                });
+            },
+            async animateChar(char) {
+                if (this.writing) {
+                    return;
+                }
+                this.writing = true;
+                let writerEl = this.$el.querySelector('#writer');
+                writerEl.style.display = '';
+                this.writer.pauseAnimation();
+                this.writer.setCharacter(char);
+                this.writer.showCharacter();
+                await this.sleep(1000);
+                this.writer.hideCharacter();
+                await this.sleep(1000);
+                await this.writer.animateCharacter();
+                await this.sleep(1000);
+                writerEl.style.display = 'none';
+                this.writing = false;
+            }
+        }
+    });
+    // function handleClick() {
+    //     writer.animateCharacter();
+    // }
+</script>
+</body>
+</html>
